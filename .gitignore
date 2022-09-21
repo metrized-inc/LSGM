@@ -6,3 +6,6 @@ visualizations/
 .run/
 *.pyc
 *.pdf
+mnist
+cifar10
+sik_carbon

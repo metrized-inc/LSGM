@@ -350,7 +350,7 @@ if __name__ == '__main__':
     # data
     parser.add_argument('--dataset', type=str, default='cifar10',
                         choices=['cifar10', 'celeba_64', 'celeba_256', 'mnist', 'omniglot',
-                                 'imagenet_32', 'ffhq', 'lsun_bedroom_128', 'lsun_church_256'],
+                                 'imagenet_32', 'ffhq', 'lsun_bedroom_128', 'lsun_church_256', 'custom'],
                         help='which dataset to use')
     parser.add_argument('--data', type=str, default='/tmp/nvae-diff/data',
                         help='location of the data corpus')

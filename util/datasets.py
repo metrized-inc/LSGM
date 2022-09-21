@@ -88,10 +88,46 @@ class OMNIGLOT(Dataset):
     def __len__(self):
         return len(self.data)
 
+def load_custom_dataset(data_path):
+
+    train_path = os.path.join(data_path, 'train')
+    val_path = os.path.join(data_path, 'val')
+
+    train_names = os.listdir(train_path)
+    val_names = os.listdir(val_path)
+
+    train_img_paths = [os.path.join(train_path, name) for name in train_names]
+    val_img_paths = [os.path.join(val_path, name) for name in val_names]
+    return train_img_paths, val_img_paths
+
+class CustomDataset(Dataset):
+    def __init__(self, data_paths, transform):
+        self.data_paths = data_paths
+        self.transform = transform
+
+    def __getitem__(self, index):
+        image = Image.open(self.data_paths[index])
+        image = self.transform(image)
+        return image, 0
+
+    def __len__(self):
+        return len(self.data_paths)
+
+
+    
 
 def get_loaders_eval(dataset, root, distributed, batch_size, augment=True, drop_last_train=True, shuffle_train=True,
                      binarize_binary_datasets=True):
-    if dataset == 'cifar10':
+
+    if dataset == 'custom':
+        num_classes = 1
+        train_transform, valid_transform = _data_transforms_custom()
+        train_transform = train_transform if augment else valid_transform
+        train_img_paths, val_img_paths = load_custom_dataset(root)
+        train_data = CustomDataset(train_img_paths, train_transform)
+        valid_data = CustomDataset(val_img_paths, valid_transform)
+
+    elif dataset == 'cifar10':
         num_classes = 10
         train_transform, valid_transform = _data_transforms_cifar10()
         train_transform = train_transform if augment else valid_transform
@@ -217,6 +253,19 @@ def random_split_dataset(dataset, lengths, seed=0):
     return [torch.utils.data.Subset(dataset, indices[offset - length:offset])
             for offset, length in zip(_accumulate(lengths), lengths)]
 
+def _data_transforms_custom():
+    train_transform = transforms.Compose([
+        transforms.Resize(size=(224, 224), interpolation=Image.Resampling.BICUBIC),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor()
+    ])
+
+    valid_transform = transforms.Compose([
+        transforms.Resize(size=(224, 224), interpolation=Image.Resampling.BICUBIC),
+        transforms.ToTensor()
+    ])
+
+    return train_transform, valid_transform
 
 def _data_transforms_cifar10():
     """Get data transforms for cifar10."""

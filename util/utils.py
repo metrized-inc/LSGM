@@ -411,6 +411,8 @@ def num_output(dataset):
         return 3 * size * size
     elif dataset == 'ffhq':
         return 3 * 256 * 256
+    elif dataset == 'custom':
+        return 3 * 224 * 224
     else:
         raise NotImplementedError
 
@@ -425,6 +427,8 @@ def get_input_size(dataset):
         return size
     elif dataset == 'ffhq':
         return 256
+    elif dataset == 'custom':
+        return 224
     else:
         raise NotImplementedError
 
@@ -686,7 +690,7 @@ def init_processes(rank, size, fn, args):
     os.environ['MASTER_ADDR'] = args.master_address
     os.environ['MASTER_PORT'] = '6020'
     torch.cuda.set_device(args.local_rank)
-    dist.init_process_group(backend='nccl', init_method='env://', rank=rank, world_size=size)
+    dist.init_process_group(backend='gloo', init_method='env://', rank=rank, world_size=size)
     fn(args)
     dist.barrier()
     dist.destroy_process_group()
